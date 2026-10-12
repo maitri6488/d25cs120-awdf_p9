@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practical 9: In-Memory Caching & Optimization</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>Practical 9: In-Memory Caching with node-cache</h1>
+            <p>Server-side caching for REST API performance optimization & response time measurement</p>
+        </header>
+
+        <!-- Notification Banner -->
+        <div id="toast" class="toast hidden"></div>
+
+        <div class="grid-layout">
+            <!-- Left Column: Cache Stats & Benchmark -->
+            <div class="column">
+                <!-- Cache Metrics Card -->
+                <div class="card">
+                    <h2>📊 Live Cache Statistics</h2>
+                    <p class="card-desc">Exposed via <code>GET /api/cache-stats</code> (Supplementary Problem)</p>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-number" id="stat-hits">0</span>
+                            <span class="stat-label">Cache Hits</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number" id="stat-misses">0</span>
+                            <span class="stat-label">Cache Misses</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number" id="stat-rate">0%</span>
+                            <span class="stat-label">Hit Rate</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number" id="stat-invalidations">0</span>
+                            <span class="stat-label">Invalidations</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <button id="btn-refresh-stats" class="btn btn-secondary">Refresh Stats</button>
+                        <button id="btn-clear-cache" class="btn btn-danger">Flush Cache</button>
+                        <button id="btn-seed" class="btn btn-secondary">Seed 6 Tasks</button>
+                    </div>
+                </div>
+
+                <!-- Response Time Benchmark Card -->
+                <div class="card">
+                    <h2>⚡ Response Time Benchmark</h2>
+                    <p class="card-desc">Rubric requirement: Record & compare 3 sample readings (Cached vs Uncached)</p>
+                    
+                    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                        <button id="btn-run-benchmark" class="btn btn-primary" style="flex: 1;">
+                            🚀 Run 3x3 Benchmark Test
+                        </button>
+                    </div>
+
+                    <table class="benchmark-table">
+                        <thead>
+                            <tr>
+                                <th>Test #</th>
+                                <th>Uncached (Database)</th>
+                                <th>Cached (node-cache)</th>
+                                <th>Speedup</th>
+                            </tr>
+                        </thead>
+                        <tbody id="benchmark-body">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #888;">
+                                    Click "Run 3x3 Benchmark Test" to record response times
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Column: Task Management & Invalidation Test -->
+            <div class="column">
+                <!-- Create Task Form -->
+                <div class="card">
+                    <h2>➕ Create Task (Triggers Invalidation)</h2>
+                    <p class="card-desc">Writing to DB immediately invalidates <code>all_tasks</code> cache key</p>
+                    
+                    <form id="create-task-form">
+                        <div class="form-group">
+                            <label for="task-title">Title *</label>
+                            <input type="text" id="task-title" placeholder="e.g. Test cache invalidation" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="task-desc">Description</label>
+                            <input type="text" id="task-desc" placeholder="Task details (optional)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="task-priority">Priority</label>
+                            <select id="task-priority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success" style="width: 100%;">Create Task & Invalidate Cache</button>
+                    </form>
+                </div>
+
+                <!-- Tasks List -->
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h2>Tasks List</h2>
+                        <div style="display: flex; gap: 6px;">
+                            <button id="btn-fetch-cached" class="btn btn-sm btn-primary">Fetch (Cached)</button>
+                            <button id="btn-fetch-uncached" class="btn btn-sm btn-secondary">Fetch (Bypass)</button>
+                        </div>
+                    </div>
+
+                    <!-- Fetch Status Banner -->
+                    <div id="fetch-indicator" class="fetch-indicator hidden"></div>
+
+                    <div id="tasks-loading" class="hidden" style="text-align: center; padding: 12px; color: #666;">
+                        Loading tasks...
+                    </div>
+
+                    <ul id="tasks-list" class="tasks-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>AWDF Practical 9 &bull; Maitri Sheta (D25CS120) &bull; CSE, CSPIT &bull; Charotar University of Science and Technology</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

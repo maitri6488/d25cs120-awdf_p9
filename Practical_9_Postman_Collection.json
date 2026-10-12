@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "a9b1c2d3-e4f5-4789-abcd-prac9collection",
+    "name": "AWDF Practical 9: In-Memory Caching (node-cache)",
+    "description": "Postman Collection for testing server-side in-memory caching, response time benchmarks, and cache invalidation.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GET All Tasks (Cache Check)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks"]
+        },
+        "description": "First request will be a CACHE MISS (Header X-Cache: MISS, ~40ms). Subsequent requests will be CACHE HIT (Header X-Cache: HIT, ~3ms)."
+      }
+    },
+    {
+      "name": "2. GET All Tasks (Bypass Cache for Benchmark)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/tasks?bypass=true",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks"],
+          "query": [
+            {
+              "key": "bypass",
+              "value": "true"
+            }
+          ]
+        },
+        "description": "Bypasses node-cache and always queries MongoDB directly to measure uncached baseline response times."
+      }
+    },
+    {
+      "name": "3. GET Single Task by ID (Cached Separately)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/tasks/66f8e0a123456789abcdef01",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks", "66f8e0a123456789abcdef01"]
+        },
+        "description": "Supplementary Problem 1: Caches single task separately under key task_:id."
+      }
+    },
+    {
+      "name": "4. POST Create Task (Invalidates Cache)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"New Task Testing Cache Invalidation\",\n  \"description\": \"Writing to DB clears all_tasks in node-cache\",\n  \"priority\": \"high\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks"]
+        },
+        "description": "Creates task and invalidates the all_tasks cache key. Next GET /tasks will be a CACHE MISS."
+      }
+    },
+    {
+      "name": "5. PUT Update Task (Invalidates Cache)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"completed\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/tasks/66f8e0a123456789abcdef01",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks", "66f8e0a123456789abcdef01"]
+        },
+        "description": "Updates task and invalidates both all_tasks and task_:id keys."
+      }
+    },
+    {
+      "name": "6. DELETE Task (Invalidates Cache)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/tasks/66f8e0a123456789abcdef01",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["tasks", "66f8e0a123456789abcdef01"]
+        },
+        "description": "Deletes task and clears relevant cache keys."
+      }
+    },
+    {
+      "name": "7. GET Cache Debug Stats (Supplementary Problem 2)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/cache-stats",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "cache-stats"]
+        },
+        "description": "Returns hit count, miss count, hit rate %, invalidations, and internal node-cache memory stats."
+      }
+    },
+    {
+      "name": "8. POST Flush All Cache Keys",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/cache-clear",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "cache-clear"]
+        },
+        "description": "Manually clears all keys in memory."
+      }
+    },
+    {
+      "name": "9. POST Seed Sample Tasks",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/seed-tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "seed-tasks"]
+        },
+        "description": "Seeds 6 tasks into database to make cache latency improvements clearly measurable."
+      }
+    }
+  ]
+}
